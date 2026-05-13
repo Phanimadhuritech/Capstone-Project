@@ -1,8 +1,7 @@
-import { useParams, useLocation, useNavigate } from "react-router";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../store/authStore";
-import { toast } from "react-hot-toast";
 import {
   articlePageWrapper,
   articleHeader,
@@ -33,10 +32,10 @@ function ArticleByID() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const { register, handleSubmit } = useForm();
 
   const user = useAuth((state) => state.currentUser);
-  console.log("user ", user)
+  console.log("user ",user)
 
   const [article, setArticle] = useState(location.state || null);
   const [loading, setLoading] = useState(false);
@@ -51,7 +50,7 @@ function ArticleByID() {
       setLoading(true);
 
       try {
-        const res = await axios.get(`http://localhost:4000/user-api/article/${id}`, { withCredentials: true });
+        const res = await axios.get(`https://capstone-project-ecru-eight.vercel.app/user-api/article/${id}`, { withCredentials: true });
 
         setArticle(res.data.payload);
       } catch (err) {
@@ -72,18 +71,6 @@ function ArticleByID() {
     });
   };
 
-  const getProfilePath = () => {
-    if (!user) return "/";
-    switch (user.role) {
-      case "AUTHOR":
-        return "/author-profile";
-      case "ADMIN":
-        return "/admin-profile";
-      default:
-        return "/user-profile";
-    }
-  };
-
   // delete & restore article
   const toggleArticleStatus = async () => {
     const newStatus = !article.isArticleActive;
@@ -93,7 +80,7 @@ function ArticleByID() {
 
     try {
       const res = await axios.patch(
-        "http://localhost:4000/author-api/articles",
+        "https://capstone-project-ecru-eight.vercel.app/author-api/articles",
         { articleId: article._id, isArticleActive: newStatus },
         { withCredentials: true },
       );
@@ -123,22 +110,18 @@ function ArticleByID() {
 
   //post comment by user
   const addComment = async (commentObj) => {
-    // {comment: "user comment"}
+    //{comment:"user comment"}
+    //add artcileId
     commentObj.articleId = article._id;
-    try {
-      const res = await axios.put("http://localhost:4000/user-api/articles", commentObj, { withCredentials: true });
-      if (res.status === 200) {
-        setArticle(res.data.payload);
-        reset();
-      }
-    } catch (err) {
-      const msg = err.response?.data?.message || "Failed to add comment";
-      setError(msg);
-      toast.error(msg);
+    console.log(commentObj);
+    let res = await axios.put("https://capstone-project-ecru-eight.vercel.app/user-api/articles", commentObj, { withCredentials: true });
+    if (res.status === 200) {
+      
+      setArticle(res.data.payload);
     }
   };
 
-  // console.log("article",article)
+ // console.log("article",article)
 
 
   if (loading) return <p className={loadingClass}>Loading article...</p>;
@@ -149,16 +132,6 @@ function ArticleByID() {
     <div className={articlePageWrapper}>
       {/* Header */}
       <div className={articleHeader}>
-        {user && (
-          <button
-            className="mb-4 inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
-            onClick={() => navigate(getProfilePath())}
-          >
-            <span className="text-2xl">←</span>
-            <span>Back to Profile</span>
-          </button>
-        )}
-
         <span className={articleCategory}>{article.category}</span>
 
         <h1 className={`${articleMainTitle} uppercase`}>{article.title}</h1>
@@ -185,20 +158,17 @@ function ArticleByID() {
           </button>
         </div>
       )}
-
-      {/* COMMENT actions */}
-      {user && user.role !== "ADMIN" && (
+      {/* form to add comment if role is USER */}
+      {/* USER actions */}
+      {user?.role === "USER" && (
         <div className={articleActions}>
           <form onSubmit={handleSubmit(addComment)}>
             <input
               type="text"
-              {...register("comment", { required: "Comment is required" })}
+              {...register("comment")}
               className={inputClass}
               placeholder="Write your comment here..."
             />
-            {errors.comment && (
-              <p className="text-red-500 text-sm mt-2">{errors.comment.message}</p>
-            )}
             <button type="submit" className="bg-amber-600 text-white px-5 py-2 rounded-2xl mt-5">
               Add comment
             </button>
