@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import { useAuth } from "../store/authStore";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-hot-toast";
 
 function Home() {
   const { isAuthenticated, currentUser } = useAuth();
@@ -27,29 +28,37 @@ function Home() {
     fetchFeaturedArticles();
   }, []);
 
-  const featuredArticles = [
-    {
-      id: 1,
-      category: "Technology",
-      title: "The Future of AI in Everyday Life",
-      description:
-        "Explore how artificial intelligence is transforming productivity and creativity.",
-    },
-    {
-      id: 2,
-      category: "Programming",
-      title: "Why MERN Stack Is Still Popular",
-      description:
-        "Learn why developers still prefer MongoDB, Express, React and Node.",
-    },
-    {
-      id: 3,
-      category: "Web Development",
-      title: "Building UI with React and Tailwind",
-      description:
-        "Understand how Tailwind CSS helps create responsive user interfaces.",
-    },
-  ];
+  const handleStartReading = () => {
+    if (!isAuthenticated) {
+      toast.error("Please register or login to read articles");
+      navigate("/login");
+      return;
+    }
+
+    if (articles.length === 0) {
+      toast("No articles available yet");
+      return;
+    }
+
+    navigate(`/article/${articles[0]._id}`, {
+      state: articles[0],
+    });
+  };
+
+  const handleWriteArticle = () => {
+    if (!isAuthenticated) {
+      toast.error("Please login as an author to write an article");
+      navigate("/login");
+      return;
+    }
+
+    if (currentUser?.role !== "AUTHOR") {
+      toast.error("Only authors can write articles");
+      return;
+    }
+
+    navigate("/author-profile/write-article");
+  };
 
   return (
     <div className="min-h-screen bg-[#f7f2ea]">
@@ -91,8 +100,19 @@ function Home() {
           )}
         </div>
         <div className="flex flex-col justify-center items-center gap-4">
-        <button className="bg-[#d4a017] hover:bg-[#bf8f12] text-[#2e2e2e] font-semibold px-6 py-3 rounded-xl w-full md:w-auto transition">Start Reading</button>
-        <button className="border border-[#b55239] text-[#b55239] hover:bg-[#b55239] hover:text-white px-6 py-3 rounded-xl w-full md:w-auto transition">Write Article</button>
+        <button
+          className="bg-[#d4a017] hover:bg-[#bf8f12] text-[#2e2e2e] font-semibold px-6 py-3 rounded-xl w-full md:w-auto transition disabled:opacity-60"
+          onClick={handleStartReading}
+          disabled={loading}
+        >
+          Start Reading
+        </button>
+        <button
+          className="border border-[#b55239] text-[#b55239] hover:bg-[#b55239] hover:text-white px-6 py-3 rounded-xl w-full md:w-auto transition"
+          onClick={handleWriteArticle}
+        >
+          Write Article
+        </button>
         </div>
       </div>
     </div>

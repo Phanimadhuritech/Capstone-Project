@@ -27,12 +27,15 @@ import {
   commentText,
 } from "../styles/common.js";
 import { useForm } from "react-hook-form";
+import { toast } from "react-hot-toast";
+
+const API_BASE_URL = "http://localhost:4000";
 
 function ArticleByID() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, reset } = useForm();
 
   const user = useAuth((state) => state.currentUser);
   console.log("user ",user)
@@ -50,7 +53,7 @@ function ArticleByID() {
       setLoading(true);
 
       try {
-        const res = await axios.get(`https://capstone-project-ecru-eight.vercel.app/user-api/article/${id}`, { withCredentials: true });
+        const res = await axios.get(`${API_BASE_URL}/user-api/article/${id}`, { withCredentials: true });
 
         setArticle(res.data.payload);
       } catch (err) {
@@ -80,7 +83,7 @@ function ArticleByID() {
 
     try {
       const res = await axios.patch(
-        "https://capstone-project-ecru-eight.vercel.app/author-api/articles",
+        `${API_BASE_URL}/author-api/articles`,
         { articleId: article._id, isArticleActive: newStatus },
         { withCredentials: true },
       );
@@ -110,14 +113,20 @@ function ArticleByID() {
 
   //post comment by user
   const addComment = async (commentObj) => {
-    //{comment:"user comment"}
-    //add artcileId
-    commentObj.articleId = article._id;
-    console.log(commentObj);
-    let res = await axios.put("https://capstone-project-ecru-eight.vercel.app/user-api/articles", commentObj, { withCredentials: true });
-    if (res.status === 200) {
-      
-      setArticle(res.data.payload);
+    try {
+      const res = await axios.put(
+        `${API_BASE_URL}/user-api/articles`,
+        { ...commentObj, articleId: article._id },
+        { withCredentials: true },
+      );
+
+      if (res.status === 200) {
+        reset();
+        toast.success("Comment added");
+        setArticle(res.data.payload);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Could not add comment");
     }
   };
 
