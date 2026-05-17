@@ -29,7 +29,7 @@ import {
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 
-const API_BASE_URL = "http://localhost:4000";
+const API_BASE_URL = "https://capstone-project-1fpf.onrender.com";
 
 function ArticleByID() {
   const { id } = useParams();
@@ -38,7 +38,7 @@ function ArticleByID() {
   const { register, handleSubmit, reset } = useForm();
 
   const user = useAuth((state) => state.currentUser);
-  console.log("user ",user)
+  console.log("user ", user)
 
   const [article, setArticle] = useState(location.state || null);
   const [loading, setLoading] = useState(false);
@@ -130,7 +130,7 @@ function ArticleByID() {
     }
   };
 
- // console.log("article",article)
+  // console.log("article",article)
 
 
   if (loading) return <p className={loadingClass}>Loading article...</p>;

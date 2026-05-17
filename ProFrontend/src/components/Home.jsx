@@ -13,7 +13,7 @@ function Home() {
   useEffect(() => {
     const fetchFeaturedArticles = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/user-api/articles", {
+        const res = await axios.get("https://capstone-project-1fpf.onrender.com/user-api/articles", {
           withCredentials: true
         });
         setArticles(res.data.payload || []);
@@ -100,19 +100,19 @@ function Home() {
           )}
         </div>
         <div className="flex flex-col justify-center items-center gap-4">
-        <button
-          className="bg-[#d4a017] hover:bg-[#bf8f12] text-[#2e2e2e] font-semibold px-6 py-3 rounded-xl w-full md:w-auto transition disabled:opacity-60"
-          onClick={handleStartReading}
-          disabled={loading}
-        >
-          Start Reading
-        </button>
-        <button
-          className="border border-[#b55239] text-[#b55239] hover:bg-[#b55239] hover:text-white px-6 py-3 rounded-xl w-full md:w-auto transition"
-          onClick={handleWriteArticle}
-        >
-          Write Article
-        </button>
+          <button
+            className="bg-[#d4a017] hover:bg-[#bf8f12] text-[#2e2e2e] font-semibold px-6 py-3 rounded-xl w-full md:w-auto transition disabled:opacity-60"
+            onClick={handleStartReading}
+            disabled={loading}
+          >
+            Start Reading
+          </button>
+          <button
+            className="border border-[#b55239] text-[#b55239] hover:bg-[#b55239] hover:text-white px-6 py-3 rounded-xl w-full md:w-auto transition"
+            onClick={handleWriteArticle}
+          >
+            Write Article
+          </button>
         </div>
       </div>
     </div>
