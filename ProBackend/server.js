@@ -12,17 +12,28 @@ config();
 //create express app
 const app = exp();
 //enable cors
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://capstone-project-rho-sable.vercel.app"
+];
+
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://capstone-project-rho-sable.vercel.app"
-  ],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ""))) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
   credentials: true
 }))
 //add cookie parser middeleware
 app.use(cookieParser())
 //body parser middleware
 app.use(exp.json());
+app.get("/", (req, res) => {
+  res.send("Backend running successfully");
+});
 //path level middlewares
 app.use("/user-api", userApp);
 app.use("/author-api", authorApp);
@@ -32,13 +43,15 @@ app.use("/auth", commonApp);
 //connect to db
 const connectDB = async () => {
   try {
+    console.log("DB URL:", process.env.DB_URL);
     await connect(process.env.DB_URL);
     console.log("DB server connected");
     //assign port
     const port = process.env.PORT || 5000;
     app.listen(port, () => console.log(`server listening on ${port}..`));
   } catch (err) {
-    console.log("err in db connect", err);
+    console.error("DB CONNECTION ERROR:");
+    console.error(err);
   }
 };
 
@@ -52,7 +65,7 @@ app.use((req, res, next) => {
 
 //Error handling middleware
 app.use((err, req, res, next) => {
-  console.log("error is ",err)
+  console.log("error is ", err)
   console.log("Full error:", JSON.stringify(err, null, 2));
   //ValidationError
   if (err.name === "ValidationError") {

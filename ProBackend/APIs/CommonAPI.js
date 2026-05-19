@@ -11,6 +11,17 @@ import { uploadToCloudinary } from "../config/cloudinaryUpload.js";
 import cloudinary from "../config/cloudinary.js";
 config();
 
+const getCookieOptions = (req) => {
+  const origin = req.get("origin") || "";
+  const isDeployedFrontend = origin.includes("capstone-project-rho-sable.vercel.app");
+
+  return {
+    httpOnly: true,
+    secure: isDeployedFrontend,
+    sameSite: isDeployedFrontend ? "none" : "lax",
+  };
+};
+
 //Route for register
 commonApp.post("/users", upload.single("profileImageUrl"), async (req, res, next) => {
   let cloudinaryResult;
@@ -91,11 +102,7 @@ commonApp.post("/login", async (req, res) => {
   );
 
   //set token to res header as httpOnly cookie
-  res.cookie("token", signedToken, {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-  });
+  res.cookie("token", signedToken, getCookieOptions(req));
   //remove password from user document
   let userObj = user.toObject();
   delete userObj.password;
@@ -107,11 +114,7 @@ commonApp.post("/login", async (req, res) => {
 //Route for Logout
 commonApp.get("/logout", (req, res) => {
   //delete token from cookie storage
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-  });
+  res.clearCookie("token", getCookieOptions(req));
   //send res
   res.status(200).json({ message: "Logout success" });
 });

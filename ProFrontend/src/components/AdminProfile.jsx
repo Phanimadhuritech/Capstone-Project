@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 
+const API_BASE_URL = 'https://capstone-project-1fpf.onrender.com'
+
 function AdminProfile() {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -17,7 +19,7 @@ function AdminProfile() {
     try {
       setLoading(true)
       setError(null)
-      const res = await axios.get('https://capstone-project-ecru-eight.vercel.app/admin/users', { 
+      const res = await axios.get(`${API_BASE_URL}/admin-api/users`, { 
         withCredentials: true 
       })
       if (res.status === 200) {
@@ -36,7 +38,7 @@ function AdminProfile() {
     try {
       setUpdatingId(userId)
       const res = await axios.patch(
-        'https://capstone-project-ecru-eight.vercel.app/admin/users',
+        `${API_BASE_URL}/admin-api/users`,
         {
           userId,
           isUserActive: !currentStatus
